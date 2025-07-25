@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Option Pricing: a discrete perspective — Keivan Namjou</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond"
+            rel="stylesheet"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        />
+        <link rel="stylesheet" href="../style.css" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.js"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/contrib/auto-render.min.js"></script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="../notes.html">Notes</a></h1>
+        </header>
+
+        <main class="note-container">
+            <div class="note-header">
+                <h1 class="note-title">Option pricing: a discrete perspective</h1>
+                <div class="note-meta">
+                    <p class="author"><a href="https://knisle.xyz">Keivan Namjou</a></p>
+                    <p class="date">July 22, 2025</p>
+                </div>
+            </div>
+
+            <div class="abstract">
+                <h2>Abstract</h2>
+                <p>
+                    In these notes, we cover the basics of option pricing, starting with how derivatives pay off and the put-call parity relationship. We introduce risk-neutral probabilities, which are the key tool for pricing derivatives; they let market makers hedge their positions instead of gambling on price movements. We build up the binomial pricing model step by step, showing how no-arbitrage arguments and hedging naturally give us option prices. Finally, we extend this to multi-step trees and show how they converge to the Black-Scholes formula, connecting discrete hedging to continuous-time pricing.
+                </p>
+            </div>
+
+            <div class="table-of-contents">
+                <h2>Contents</h2>
+                <ul class="toc-list">
+                    <li class="toc-item">
+                        <a href="#introduction" class="toc-link" data-section="introduction">
+                            <span class="toc-number">1.</span>Introduction
+                        </a>
+                    </li>
+                    <li class="toc-item">
+                        <a href="#payoff-maturity" class="toc-link" data-section="payoff-maturity">
+                            <span class="toc-number">2.</span>Payoff at maturity
+                        </a>
+                    </li>
+                    <li class="toc-item">
+                        <a href="#put-call-parity" class="toc-link" data-section="put-call-parity">
+                            <span class="toc-number">3.</span>Put-call parity
+                        </a>
+                    </li>
+                    <li class="toc-item">
+                        <a href="#risk-neutral-probabilities" class="toc-link" data-section="risk-neutral-probabilities">
+                            <span class="toc-number">4.</span>Risk-neutral probabilities
+                        </a>
+                    </li>
+                    <li class="toc-item">
+                        <a href="#binomial-pricing-model" class="toc-link" data-section="binomial-pricing-model">
+                            <span class="toc-number">5.</span>Binomial pricing model
+                        </a>
+                    </li>
+                    <li class="toc-item">
+                        <a href="#multi-step-binomial" class="toc-link" data-section="multi-step-binomial">
+                            <span class="toc-number">6.</span>Multi-step binomial model and the continuous limit
+                        </a>
+                    </li>
+                    <li class="toc-item">
+                        <a href="#references" class="toc-link" data-section="references">
+                            References
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="note-content">
+                <h2 id="introduction">1. Introduction</h2>
+                <p>
+                    In financial markets there are two types of products: underlying assets (primary products) and their derivatives (secondary products). The underlying assets include stocks, bonds, commodities, currencies, etc., whereas derivatives are contracts whose values are derived from those underlying assets. Two of the most common derivatives are forward contracts and options. A forward contract is an agreement to buy or sell an asset at a predetermined price (strike price \(K\)) on a specific future date (maturity date \(T\)), and it must be exercised. An option, however, gives the holder the right, but not the obligation, to buy or sell an asset at a predetermined strike price \(K\) within a specified time period up to maturity \(T\).
+                </p>
+                
+                <p>
+                    These contracts can correspond to long or short positions. A long position means betting that asset prices will rise, while a short position means betting that asset prices will fall. For forward contracts, a long forward contract is an obligation to buy an asset at maturity, and a short forward contract is an obligation to sell an asset at maturity. For options, we have call options (the right to buy) and put options (the right to sell). A long call option means the investor buys the right to buy an asset, and a short call option means the investor sells the right to buy an asset. A long put option means the investor buys the right to sell an asset, and a short put option means the investor sells the right to sell an asset.
+                </p>
+
+                <h2 id="payoff-maturity">2. Payoff at maturity</h2>
+                <p>
+                    To establish the notation, we refer to the premium (price of the derivative) as \(V\), the current asset price as \(S\), the asset price at maturity as \(S_T\), the strike price as \(K\), and the payoff as \(P\). For long forward contracts, the payoff will be
+                </p>
+                
+                <div class="equation">
+                    $P_{\text{LF}} = S_T - K,$
+                </div>
+                
+                <p>
+                    and for short forward contracts,
+                </p>
+                
+                <div class="equation">
+                    $P_{\text{SF}} = K - S_T.$
+                </div>
+                
+                <p>
+                    Note that the payoffs can be negative in both cases. For call options, the payoff for the long and short positions will be
+                </p>
+                
+                <div class="equation">
+                    $P_{\text{LC}} = \max(S_T - K, 0), \quad P_{\text{SC}} = - \max(S_T - K, 0) = \min(K - S_T, 0),$
+                </div>
+                
+                <p>
+                    respectively. Finally, for put options, the payoff for the long and short positions will be
+                </p>
+                
+                <div class="equation">
+                    $P_{\text{LP}} = \max(K - S_T, 0), \quad P_{\text{SP}} = - \max(K - S_T, 0) = \min(S_T - K, 0).$
+                </div>
+
+                <p>
+                    The above payoffs represent the intrinsic value at maturity and do not account for the cost of entering the position. To calculate the net payoff \(\tilde{P}\), we must subtract the premium paid (for long positions) or add the premium received (for short positions), adjusted to maturity using the risk-free rate \(r\) and time to maturity \(T\).<sup><a href="#footnote1" class="footnote-ref" id="footnote-ref1">1</a></sup> For forward contracts, we find
+                </p>
+                
+                <div class="equation">
+                    $\tilde{P}_{\text{LF}} = S_T - K - \mathrm{e}^{rT} V_F, \quad \tilde{P}_{\text{SF}} = K - S_T + \mathrm{e}^{rT} V_F,$
+                </div>
+                
+                <p>
+                    for call options,
+                </p>
+                
+                <div class="equation">
+                    $\tilde{P}_{\text{LC}} = \max(S_T - K, 0) - \mathrm{e}^{rT} V_C, \quad \tilde{P}_{\text{SC}} = \min(K - S_T, 0) + \mathrm{e}^{rT} V_C,$
+                </div>
+                
+                <p>
+                    and, for put options,
+                </p>
+                
+                <div class="equation">
+                    $\tilde{P}_{\text{LP}} = \max(K - S_T, 0) - \mathrm{e}^{rT} V_P, \quad \tilde{P}_{\text{SP}} = \min(S_T - K, 0) + \mathrm{e}^{rT} V_P.$
+                </div>
+
+                <p>
+                    There are two common types of option contracts: European options, where the holder can exercise the right only at the maturity date, and American options, which allow exercise at any time before and up to maturity. In the rest of these notes, we focus on European options, since they are mathematically more tractable and provide the foundation for understanding American options.
+                </p>
+
+                <h2 id="put-call-parity">3. Put-call parity</h2>
+                <p>
+                    Based on the information established above, we can construct two portfolios that have identical payoffs at maturity:
+                </p>
+                
+                <p>
+                    Portfolio I: long call + present value of the strike price, whose value at maturity is
+                    $\max(S_T - K, 0) + K = \begin{cases}
+                        S_T & \text{if } S_T > K \\
+                        K & \text{if } S_T \leq K
+                    \end{cases}$
+                </p>
+                
+                <p>
+                    Portfolio II: long put + current asset, whose value at maturity is
+                    $\max(K - S_T, 0) + S_T = \begin{cases}
+                        K & \text{if } S_T \leq K \\
+                        S_T & \text{if } S_T > K
+                    \end{cases}$
+                </p>
+                
+                <p>
+                    Both portfolios yield \(\max(S_T, K)\) at maturity, regardless of the final asset price.
+                </p>
+
+                <p>
+                    Since both portfolios have the same payoff at maturity, they must have the same value today to prevent arbitrage opportunities. This gives us the put-call parity relationship:
+                </p>
+                
+                <div class="equation">
+                    $V_C + \mathrm{e}^{-rT} K = V_P + S.$
+                </div>
+                
+                <p>
+                    When the underlying asset pays dividends during the option's life, this affects the parity since the stock holder receives dividends while the put holder does not. The relationship becomes:
+                </p>
+                
+                <div class="equation">
+                    $V_C + \mathrm{e}^{-rT} K = V_P + S - D,$
+                </div>
+                
+                <p>
+                    where \(D\) represents the present value of dividends paid before maturity.
+                </p>
+
+                <h2 id="risk-neutral-probabilities">4. Risk-neutral probabilities</h2>
+                <p>
+                    To understand what we mean by risk-neutral valuation, let us start with a simple example. Consider an asset with current price \(S\) that can move in only two directions over a given time period: it can increase to \(Su\) with probability \(p\), where \(u > 1\), or decrease to \(Sd\) with probability \(1-p\), where \(d < 1\). Using these actual probabilities, the expected future value of the asset is
+                </p>
+                
+                <div class="equation">
+                    $\langle S_T \rangle = (pu + (1-p)d) S.$
+                </div>
+                
+                <p>
+                    Now consider a call option with strike price \(K\). If we assume that \(Su > K\) and \(Sd < K\), then the option is in-the-money only when the asset price goes up. The expected payoff of the option at maturity is
+                </p>
+                
+                <div class="equation">
+                    $\langle \max(S_T - K, 0) \rangle = p (Su - K).$
+                </div>
+                
+                <p>
+                    A natural question is whether we can price the call option by simply discounting this expected payoff:
+                </p>
+                
+                <div class="equation">
+                    $V_C \stackrel{?}{=} \mathrm{e}^{-rT} \langle \max(S_T - K, 0) \rangle = \mathrm{e}^{-rT} p(Su - K).$
+                </div>
+                
+                <p>
+                    The answer is no. The reason becomes clear when we consider the market maker's perspective: if we price the option using actual probabilities, there will always be scenarios where the market maker faces unavoidable losses, making this pricing approach unsustainable in a competitive market. Fundamentally, market makers seek to hedge their positions rather than speculate on the direction of asset prices.
+                </p>
+
+                <p>
+                    The solution is to use risk-neutral probabilities. We can price the call option as an expectation value of the form:
+                </p>
+                
+                <div class="equation">
+                    $V_C = \mathrm{e}^{-rT} \langle \max(S_T - K, 0) \rangle_Q,$
+                </div>
+                
+                <p>
+                    where \(\langle \cdot \rangle_Q\) denotes the risk-neutral expectation value. The key insight is that under the risk-neutral measure, the expected return of the asset equals the risk-free rate:
+                </p>
+                
+                <div class="equation">
+                    $\langle S_T \rangle_Q = \mathrm{e}^{r T} S.$
+                </div>
+                
+                <p>
+                    We can use this condition to find the risk-neutral probability \(q\) of the asset price going up. Setting up the expectation:
+                </p>
+                
+                <div class="equation">
+                    $\langle S_T \rangle_Q = (q u + (1 - q) d) S = \mathrm{e}^{rT} S,$
+                </div>
+                
+                <p>
+                    and solving for \(q\):
+                </p>
+                
+                <div class="equation">
+                    $q = \frac{\mathrm{e}^{rT} - d}{u - d}.$
+                </div>
+                
+                <p>
+                    Now we can use this risk-neutral probability \(q\) to compute the call option value:
+                </p>
+                
+                <div class="equation">
+                    $V_C = \mathrm{e}^{-rT} q(Su - K) = \frac{1 - \mathrm{e}^{-rT} d}{u - d} (Su - K).$
+                </div>
+
+                <h2 id="binomial-pricing-model">5. Binomial pricing model</h2>
+                <p>
+                    Consider that we are the market maker selling call options, and we want to create a portfolio that is completely hedged against asset price movements. The portfolio \(\Pi\) consists of selling one call option and simultaneously buying \(\Delta\) shares of the underlying asset. The value of this portfolio at maturity is
+                </p>
+                
+                <div class="equation">
+                    $\Pi_T = \Delta S_T - \max(S_T - K, 0).$
+                </div>
+
+                <p>
+                    The goal is to choose \(\Delta\) such that the portfolio value remains constant regardless of whether the asset price goes up or down. If the price rises to \(Su\), we lose money on the call option (since the buyer exercises it), but we gain on our stock holdings. If the price falls to \(Sd\), the call option expires worthless (we keep the premium), but our stock holdings lose value. By choosing the correct \(\Delta\), these gains and losses exactly offset each other, creating a risk-free portfolio.
+                </p>
+
+                <p>
+                    The value of the portfolio at maturity in each scenario is
+                </p>
+                
+                <div class="equation">
+                    $\Pi_u = \Delta Su - (Su - K), \quad \Pi_d = \Delta Sd - 0,$
+                </div>
+                
+                <p>
+                    where \(\Pi_u\) and \(\Pi_d\) represent the portfolio values when the asset price goes up and down, respectively. For a risk-free portfolio, we require \(\Pi_u = \Pi_d\), so solving for \(\Delta\):
+                </p>
+                
+                <div class="equation">
+                    $\Delta = \frac{Su - K}{S(u - d)}.$
+                </div>
+
+                <p>
+                    Now that we have determined the hedge ratio \(\Delta\), we can find the current value of the call option. The key insight is that since our hedged portfolio is completely risk-free, it must earn the risk-free rate of return. This means the current portfolio value \(\Pi = \Delta S - V_C\) must equal the present value of its constant future payoff:
+                </p>
+                
+                <div class="equation">
+                    $\Delta S - V_C = \mathrm{e}^{-rT} \Pi_T.$
+                </div>
+                
+                <p>
+                    We can use \(\Pi_T = \Pi_d = \Delta Sd\) to find
+                </p>
+                
+                <div class="equation">
+                    $V_C = \Delta S - \mathrm{e}^{-rT} \Delta Sd = \frac{Su - K}{u - d}(1 - \mathrm{e}^{-rT} d),$
+                </div>
+                
+                <p>
+                    which gives us the binomial option pricing formula. Note that this is equal to the price that we found using the risk-free probabilities. This approach shows how option pricing emerges naturally from the no-arbitrage principle and hedging arguments.
+                </p>
+
+                <h2 id="multi-step-binomial">6. Multi-step binomial model and the continuous limit</h2>
+                <p>
+                    The single-step binomial model provides the foundation, but real markets evolve continuously over time. We can extend our analysis by subdividing the time to maturity \(T\) into \(n\) smaller intervals of length \(\tau = T/n\). At each step, the asset price can move up by a factor \(u\) or down by a factor \(d\), where these parameters must be recalibrated for the shorter time intervals.
+                </p>
+
+                <p>
+                    For the multi-step model to converge to a realistic continuous-time process, we need the up and down movements to satisfy certain conditions. Following the standard approach, we set
+                </p>
+                
+                <div class="equation">
+                    $u = \mathrm{e}^{\sigma \sqrt{\tau}}, \quad d = \mathrm{e}^{-\sigma \sqrt{\tau}},$
+                </div>
+                
+                <p>
+                    where \(\sigma\) is the volatility of the underlying asset. This parameterization ensures that as \(n \to \infty\) (and thus \(\tau \to 0\)), the discrete binomial process converges to geometric Brownian motion.
+                </p>
+
+                <p>
+                    The risk-neutral probabilities at each step become
+                </p>
+                
+                <div class="equation">
+                    $p = \frac{\mathrm{e}^{r \tau} - d}{u - d}, \quad 1-p = \frac{u - \mathrm{e}^{r \tau}}{u - d}.$
+                </div>
+                
+                <p>
+                    Notice that these probabilities depend on the length of each time step, ensuring that the expected return under the risk-neutral measure equals the risk-free rate.
+                </p>
+
+                <p>
+                    At maturity, after \(n\) steps, the asset price follows a binomial distribution. If the price moves up \(j\) times and down \(n-j\) times, the final price is
+                </p>
+                
+                <div class="equation">
+                    $S_T = S u^j d^{n-j} = S \mathrm{e}^{(2j-n)\sigma\sqrt{\tau}}.$
+                </div>
+                
+                <p>
+                    The call option value is then given by the risk-neutral expectation
+                </p>
+                
+                <div class="equation">
+                    $V_C = \mathrm{e}^{-rT} \sum_{j=0}^{n} \binom{n}{j} p^j (1-p)^{n-j} \max(S u^j d^{n-j} - K, 0).$
+                </div>
+
+                <p>
+                    The hedging strategy also becomes dynamic in the multi-step model. At each node in the binomial tree, we must recompute the hedge ratio \(\Delta\) based on the current asset price and the remaining time to maturity. This reflects the reality that option hedging requires continuous rebalancing of the portfolio.
+                </p>
+
+                <p>
+                    As we take the limit \(n \to \infty\), remarkable things happen. The discrete binomial distribution converges to a continuous lognormal distribution, and the asset price follows
+                </p>
+                
+                <div class="equation">
+                    $S_T = S \exp\left[\left(r - \frac{\sigma^2}{2}\right)T + \sigma W_T\right],$
+                </div>
+                
+                <p>
+                    where \(W_T\) is a standard Brownian motion under the risk-neutral measure. The binomial option pricing formula converges to the famous Black-Scholes formula:
+                </p>
+                
+                <div class="equation">
+                    $V_C = S \Phi(d_1) - K\mathrm{e}^{-rT} \Phi(d_2),$
+                </div>
+                
+                <p>
+                    where \(\Phi\) is the cumulative standard normal distribution function and
+                </p>
+                
+                <div class="equation">
+                    $d_1 = \frac{\ln(S/K) + (r + \sigma^2/2)T}{\sigma\sqrt{T}}, \quad d_2 = d_1 - \sigma\sqrt{T}.$
+                </div>
+
+                <p>
+                    The continuous limit also reveals that the hedge ratio \(\Delta\) becomes the option's delta, \(\partial V_C/\partial S\), which measures the sensitivity of the option price to changes in the underlying asset price. This connection between discrete hedging and continuous-time derivatives is one of the most elegant results in mathematical finance, showing how the fundamental no-arbitrage principle scales from simple discrete models to sophisticated continuous-time theory.
+                </p>
+
+                <div class="footnotes">
+                    <h3>Footnotes</h3>
+                    <p id="footnote1" class="footnote">
+                        <sup><a href="#footnote-ref1" class="footnote-back">1</a></sup> We use continuous compounding, where \(\mathrm{e}^{rT} = \lim_{n \to \infty} (1 + \frac{r}{n})^{nT}\), which simplifies the mathematical treatment of time value adjustments. Note that the dimensions of \(r\) and \(T\) now cancel each other such that the exponent is dimensionless.
+                    </p>
+                </div>
+
+                <h2 id="references">References</h2>
+                <div class="references">
+                    <p id="ref1">
+                        <strong>[1]</strong> J.C. Cox, S.A. Ross and M. Rubinstein, Option pricing: A simplified approach, <em>Journal of Financial Economics</em> 7 (1979) 229-263. DOI: <a href="https://doi.org/10.1016/0304-405X(79)90015-1" target="_blank">10.1016/0304-405X(79)90015-1</a>
+                    </p>
+
+                    <p id="ref2">
+                        <strong>[2]</strong> W.F. Sharpe, G.J. Alexander and J.W. Bailey, <em>Investments</em> (6th Edition), Prentice Hall (1998). ISBN: 978-0-13-010130-3
+                    </p>
+                    
+                    <p id="ref3">
+                        <strong>[3]</strong> S.E. Shreve, <em>Stochastic Calculus for Finance I: The Binomial Asset Pricing Model</em>, Springer Finance (2004). ISBN: <a href="https://link.springer.com/book/10.1007/978-0-387-22527-2" target="_blank">978-0-387-22527-2</a>
+                    </p>
+                    
+                    <p id="ref4">
+                        <strong>[4]</strong> A. Schmidt, <em>Quantitative Finance for Physicists: An Introduction</em>, Academic Press (2005). ISBN: <a href="https://www.sciencedirect.com/book/9780120884643/quantitative-finance-for-physicists" target="_blank">978-0-12-088464-3</a>
+                    </p>
+
+                    <p id="ref5">
+                        <strong>[5]</strong> Perfiliev Financial Training, <em>Binomial Options Pricing Model Explained</em>, YouTube (2017). <a href="https://www.youtube.com/watch?v=eA5AtTx3rRI" target="_blank">https://www.youtube.com/watch?v=eA5AtTx3rRI</a>
+                    </p>
+                </div>
+            </div>
+            
+            <nav>
+                <a href="../notes.html" class="back-link">Back to notes</a>
+            </nav>
+        </main>
+
+        <script>
+            function updateActiveSection() {
+                const sections = document.querySelectorAll('h2[id], h3[id]');
+                const tocLinks = document.querySelectorAll('.toc-link');
+                
+                let currentSection = '';
+                const scrollPosition = window.scrollY + 100; // Offset for better detection
+                
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    const sectionHeight = section.offsetHeight;
+                    
+                    if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight + 200) {
+                        currentSection = section.id;
+                    }
+                });
+                
+                // Remove active class from all links
+                tocLinks.forEach(link => {
+                    link.classList.remove('active');
+                });
+                
+                // Add active class to current section link
+                if (currentSection) {
+                    const activeLink = document.querySelector(`[data-section="${currentSection}"]`);
+                    if (activeLink) {
+                        activeLink.classList.add('active');
+                    }
+                }
+            }
+            
+            // Update active section on scroll
+            window.addEventListener('scroll', updateActiveSection);
+            
+            // Update active section on page load
+            document.addEventListener('DOMContentLoaded', function() {
+                updateActiveSection();
+                
+                renderMathInElement(document.body, {
+                    delimiters: [
+                        {left: "$", right: "$", display: true},
+                        {left: "\\[", right: "\\]", display: true},
+                        {left: "$", right: "$", display: false},
+                        {left: "\\(", right: "\\)", display: false}
+                    ]
+                });
+            });
+        </script>
+    </body>
+</html>
