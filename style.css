@@ -1,0 +1,123 @@
+/* ==========================================================================
+   BASE STYLES
+   ========================================================================== */
+
+/* Global font and scroll behavior */
+html {
+    font-family: "Lora", serif;
+    font-weight: normal;
+    font-style: normal;
+    font-variant-numeric: lining-nums;
+    scroll-behavior: smooth;
+    line-height: 1.5
+}
+
+/* Main container with centered layout and max-width constraint */
+body {
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 105px;
+    width: 80%;
+    max-width: 800px;
+    background-color: white;
+    font-variant-numeric: lining-nums;
+}
+
+/* Responsive width adjustment for smaller screens */
+@media (max-width: 1000px) {
+    body {
+        width: 88%;
+    }
+}
+
+/* ==========================================================================
+   GLOBAL HEADING RESET
+   ========================================================================== */
+
+/* Reset all headings to normal font weight */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: normal;
+}
+
+/* ==========================================================================
+   LINK STYLES
+   ========================================================================== */
+
+/* Consistent link styling with academic red color */
+a:link {
+    color: #801f1f;
+    font-weight: inherit;
+    text-decoration: inherit;
+}
+
+a:visited {
+    color: #801f1f;
+    font-weight: inherit;
+    text-decoration: inherit;
+}
+
+/* ==========================================================================
+   HEADER AND NAVIGATION
+   ========================================================================== */
+
+/* Icon styling for profile links */
+.icon {
+    margin-right: 10px;
+    color: #801f1f;
+    width: 24px;
+    height: 24px;
+}
+
+/* Profile links container with flex layout */
+.profile-links {
+    display: flex;
+    align-items: center;
+    margin: 10px 0;
+}
+
+.profile-links a {
+    font-family: "Lato", sans-serif;
+    font-size: 0.95em;
+}
+
+/* Main header styling */
+header {
+    background-color: white;
+    color: black;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 7%;
+    padding-top: 47px;
+    padding-bottom: 21px;
+}
+
+/* Header typography using Lato font family */
+header h1,
+header h2,
+header h3,
+header h4,
+header h5,
+header h6 {
+    font-family: "Lato", sans-serif;
+}
+
+header a {
+    text-decoration: none;
+}
+
+/* Navigation menu styling */
+nav {
+    margin-top: 10px;
+    font-size: 1em;
+    color: #666;
+}
+
+nav a {
+    text-decoration: none;
+    color: #801f1f;
+    font-family: "Lato", sans-serif;
+}
+
+nav a:hover {
+    text-decoration: underline;
+}
